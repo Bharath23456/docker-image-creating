@@ -1,23 +1,25 @@
-name: Build Docker Image
-
-# 1. THE TRIGGER: When should this run?
-on:
-  push:
-    branches:
-      - main
-
-# 2. THE RUNNER: Where should this run?
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    # 3. THE STEPS: What exactly should it do?
-    steps:
+steps:
       # Step A: Download your code onto the GitHub server
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step B: Set up Docker's build engine (Buildx)
+      # --- NEW TESTING STEPS ---
+      # 1. Install the language runtime (e.g., Node.js)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 2. Install your app's dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 3. Run the actual tests
+      - name: Run code tests
+        run: npm test
+      # -------------------------
+
+      # Step B: Set up Docker's build engine (Only runs if npm test passes!)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -26,6 +28,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          # For this demo, we will just build the image to test it, not push it anywhere yet
           push: false
           tags: my-first-website:latest
